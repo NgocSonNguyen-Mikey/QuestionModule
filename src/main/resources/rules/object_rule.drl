@@ -1,0 +1,20 @@
+package rules;
+import vn.pipeline.Word;
+import java.util.List;
+dialect "java"
+
+global List<String> objects;
+
+rule "Detect Object from Direct Object"
+when
+    $word: Word( posTag.startsWith("N"), depLabel == "dob" || depLabel == "obj" )
+then
+    objects.add($word.getForm());
+end
+
+rule "Detect Object from Noun Modifier"
+when
+    $word: Word( posTag.startsWith("N"), depLabel == "nmod" )
+then
+    objects.add($word.getForm());
+end

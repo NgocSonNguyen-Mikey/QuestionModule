@@ -1,0 +1,51 @@
+package rules;
+import vn.pipeline.Word;
+import java.util.List;
+dialect "java"
+
+global List<String> subjects;
+
+rule "Detect Subject from Root Noun"
+when
+    $word: Word( posTag.startsWith("N"), depLabel == "root" || depLabel == "sub" )
+then
+    subjects.add($word.getForm());
+end
+
+rule "Detect Subject from Verb Phrase"
+when
+    $root: Word( posTag.startsWith("V"), depLabel == "root" )
+    $modifier: Word( depLabel == "vmod", head == $root.getIndex() )
+then
+    subjects.add($root.getForm() + " " + $modifier.getForm());
+end
+
+rule "Detect Subject from Dependent Noun"
+when
+    $word: Word( posTag.startsWith("N"), depLabel == "dob" || depLabel == "nmod" )
+then
+    subjects.add($word.getForm());
+end
+
+rule "Detect Subject from Coordination"
+when
+    $word: Word( posTag.startsWith("N"), depLabel == "dob" || depLabel == "nmod" )
+    $conj: Word( depLabel == "conj", head == $word.getIndex() )
+then
+    subjects.add($word.getForm() + $conj.getForm());
+end
+rule "Detect Compound Noun Phrase"
+when
+    $head: Word( posTag.startsWith("V"), depLabel == "vmod" ) // Động từ đứng trước
+    $modifier: Word( posTag.startsWith("N"), depLabel == "dob", head == $head.getIndex() ) // Danh từ bổ nghĩa
+then
+    subjects.add($head.getForm() + " " + $modifier.getForm());
+end
+
+rule "Detect Double Noun Phrase"
+when
+    $head: Word( posTag.startsWith("N") ) // Danh từ
+    $modifier: Word( posTag.startsWith("N"), depLabel == "nmod", head == $head.getIndex() ) // Danh từ bổ nghĩa
+then
+    subjects.add($head.getForm() + " " + $modifier.getForm());
+end

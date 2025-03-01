@@ -1,0 +1,28 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: QuestionModule
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/law_data
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASS}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          mongodb:
+            core:
+              MongoTemplate: DEBUG
+              MongoTemplate.Query: TRACE
