@@ -58,11 +58,11 @@ public class SearchService {
         return subjects;
     }
 
-//    public List<Triplet> getGraph(){
-//        var objectId = "b24f0721-eddf-11ef-9d94-0242ac1a0002";
-//        var subjectId = "%";
-//        var relationId = "6f72a86f-ede0-11ef-9d94-0242ac1a0002";
-//
-//        return tripletRepository.getGraphFromTriplet(subjectId,objectId,relationId);
-//    }
+    public List<Triplet> getGraph(){
+        var objectId = "b24f0721-eddf-11ef-9d94-0242ac1a0002";
+        var subjectId = "%";
+        var relationId = "6f72a86f-ede0-11ef-9d94-0242ac1a0002";
+
+        return tripletRepository.getGraphFromTriplet(subjectId,objectId,relationId);
+    }
 }
