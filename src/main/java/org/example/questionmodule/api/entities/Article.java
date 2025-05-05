@@ -22,7 +22,10 @@ public class Article {
     @Column(name = "code", nullable = false)
     private String code;
 
-    @Column(name = "content", nullable = false)
+    @Column(name = "title", nullable = false)
+    private String title;
+
+    @Column(name = "content", nullable = true, columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne
@@ -34,12 +37,13 @@ public class Article {
 
     @OneToMany(
             mappedBy = "article",
-            fetch = FetchType.LAZY
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
     )
     private List<Clause> clauses;
 
     private String replaceBy;
 
-    @OneToOne(mappedBy = "article")
+    @OneToOne(mappedBy = "article",cascade = CascadeType.ALL)
     private GraphKnowledge graphKnowledge;
 }

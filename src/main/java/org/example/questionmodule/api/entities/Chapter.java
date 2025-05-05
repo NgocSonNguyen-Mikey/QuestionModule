@@ -32,7 +32,8 @@ public class Chapter {
 
     @OneToMany(
             mappedBy = "chapter",
-            fetch = FetchType.LAZY
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
     )
     private List<Article> articles;
 }

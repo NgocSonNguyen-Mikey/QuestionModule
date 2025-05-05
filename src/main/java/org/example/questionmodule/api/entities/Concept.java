@@ -20,26 +20,26 @@ public class Concept {
     @Column(name = "id", nullable = false)
     private String id;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(name = "name", nullable = false, unique = true, length = 500)
     private String name;
 
-    @Column(name = "meaning", nullable = false)
+    @Column(name = "meaning", nullable = true)
     private String meaning;
 
-    @Column(name ="type", nullable = false)
+    @Column(name ="type", nullable = true)
     private String type;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "concept_attrs", joinColumns = @JoinColumn(name = "concept_id"))
     @Column(name = "attribute")
     private Set<String> attrs = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "concept_keyphrases", joinColumns = @JoinColumn(name = "concept_id"))
     @Column(name = "keyphrases")
     private Set<String> keyphrases = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "concept_similar", joinColumns = @JoinColumn(name = "concept_id"))
     @Column(name = "similar")
     private Set<String> similar = new HashSet<>();

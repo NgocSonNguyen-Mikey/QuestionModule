@@ -11,8 +11,6 @@ import java.util.List;
 public interface TripletRepository extends JpaRepository<Triplet, String> {
     Triplet findByRelationId(String relationId);
 
-    List<Triplet> getAll();
-
     @Query("SELECT t FROM Triplet t "+
             "LEFT JOIN Concept c1 ON c1.id = t.subject.id "+
             "LEFT JOIN Relation r ON r.id = t.object.id "+
@@ -21,4 +19,13 @@ public interface TripletRepository extends JpaRepository<Triplet, String> {
             "AND t.object.id LIKE ?2 "+
             "AND t.relation.id LIKE ?3")
     List<Triplet> getGraphFromTriplet(String subject_id, String object_id, String relation_id);
+
+    @Query("SELECT t FROM Triplet t " +
+            "left JOIN FETCH t.subject " +
+            "left JOIN FETCH t.relation " +
+            "left JOIN FETCH t.object " +
+            "JOIN FETCH t.tripletGraphs tg" +
+            " join fetch tg.graphKnowledge")
+
+    List<Triplet> findAllQuery();
 }

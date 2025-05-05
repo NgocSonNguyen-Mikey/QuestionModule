@@ -1,20 +1,38 @@
 package rules;
 import vn.pipeline.Word;
 import java.util.List;
+import java.util.Map
 dialect "java"
 
-global List<String> objects;
+global Map<Integer, List<Word>> results;
 
 rule "Detect Object from Direct Object"
 when
     $word: Word( posTag.startsWith("N"), depLabel == "dob" || depLabel == "obj" )
 then
-    objects.add($word.getForm());
+    results.put($word.getIndex(),List.of($word));
 end
 
-rule "Detect Object from Noun Modifier"
+rule "Object - Expand nmod/det"
 when
-    $word: Word( posTag.startsWith("N"), depLabel == "nmod" )
+    $obj : Word(depLabel == "dob", $idx : index)
+    $mod : Word(depLabel in ("nmod", "det"), head == $idx)
 then
-    objects.add($word.getForm());
+    results.put($obj.getIndex(),List.of($obj, $mod));
+end
+
+rule "Object - Verb-based guess"
+when
+    $verb : Word(posTag matches "V.*", $idx : index)
+    $obj : Word(posTag matches "N.*", head == $idx, depLabel != "sub")
+then
+    results.put($verb.getIndex(),List.of($verb, $obj));
+end
+
+rule "Object - Coordination"
+when
+    $obj1 : Word(depLabel == "dob", $head : head)
+    $obj2 : Word(depLabel == "coord", head == $head)
+then
+    results.put($obj1.getIndex(),List.of($obj1, $obj2));
 end

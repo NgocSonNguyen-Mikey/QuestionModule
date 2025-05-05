@@ -15,7 +15,6 @@ import java.util.List;
 @Table(name = "laws")
 public class Law {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @Column(nullable = false, name = "year")
@@ -26,7 +25,8 @@ public class Law {
 
     @OneToMany(
             mappedBy = "law",
-            fetch = FetchType.LAZY
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
     )
     private List<Chapter> chapters;
 }

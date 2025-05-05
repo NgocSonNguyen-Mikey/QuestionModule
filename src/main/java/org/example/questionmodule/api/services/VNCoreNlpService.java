@@ -23,6 +23,8 @@ public class VNCoreNlpService {
 
     public List<Sentence> analyzeText(String text) {
         try {
+//            System.out.println(text.length());
+            System.out.println(text);
             // Create an annotation object
             Annotation annotation = new Annotation(text);
             pipeline.annotate(annotation);
@@ -34,13 +36,13 @@ public class VNCoreNlpService {
 
             // Extract annotated results
             StringBuilder result = new StringBuilder();
-            annotation.getSentences().forEach(sentence -> {
-                sentence.getWords().forEach(word -> {
-                    result.append(String.format("Word: %s, POS: %s, NER: %s, dep: %s, head: %s\n",
-                            word.getForm(), word.getPosTag(), word.getNerLabel(), word.getDepLabel(), word.getHead()));
-                    System.out.println(result);
-                });
-            });
+//            annotation.getSentences().forEach(sentence -> {
+//                sentence.getWords().forEach(word -> {
+//                    result.append(String.format("Word: %s, POS: %s, NER: %s, dep: %s, head: %s,  index: %s\n",
+//                            word.getForm(), word.getPosTag(), word.getNerLabel(), word.getDepLabel(), word.getHead(), word.getIndex()));
+//                    System.out.println(result);
+//                });
+//            });
 
             return  annotation.getSentences();
         } catch (Exception e) {

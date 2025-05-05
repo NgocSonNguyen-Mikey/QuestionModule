@@ -8,21 +8,48 @@ spring:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/law_data
     username: ${MYSQL_USER}
     password: ${MYSQL_PASS}
+    hikari:
+      connection-timeout: 30000
+      idle-timeout: 60000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      max-lifetime: 1800000
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: false
         dialect: org.hibernate.dialect.MySQL8Dialect
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gemini-1.5-flash
+        base-url: https://generativelanguage.googleapis.com
+        completions-path: /v1beta/openai/chat/completions
 
 logging:
   level:
-    org:
-      springframework:
-        data:
-          mongodb:
-            core:
-              MongoTemplate: DEBUG
-              MongoTemplate.Query: TRACE
+    org.springframework.cache: trace
+    org.ehcache: trace
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+    org.springframework : info
+    org.springframework.ai: trace
+    org.springframework.ai.rag: trace
+    org.springframework.security: trace
+
+jwt:
+  secret_key: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
+  auth_expiration: 259200000
+
+clerk:
+  api:
+    secret-key: ${CLERK_API_SECRET_KEY}

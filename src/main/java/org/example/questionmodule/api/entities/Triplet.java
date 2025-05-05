@@ -18,35 +18,30 @@ public class Triplet {
     @Column(name = "id")
     private String id;
 
-    @ManyToOne
+    @Enumerated(EnumType.STRING)
+    private SentenceType type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "subject_id",
-            nullable = false
+            nullable = true
     )
     private Concept subject;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "object_id",
-            nullable = false
+            nullable = true
     )
     private Concept object;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "relation_id",
-            nullable = false
+            nullable = true
     )
     private Relation relation;
 
-    @ManyToMany(
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.PERSIST
-    )
-    @JoinTable(
-            name = "triplet_graph",
-            joinColumns = @JoinColumn(name = "triplet_id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "graph_id", nullable = false)
-    )
-    private List<GraphKnowledge> graphKnowledge;
+    @OneToMany(mappedBy = "triplet", fetch = FetchType.EAGER)
+    private List<TripletGraph> tripletGraphs;
 }

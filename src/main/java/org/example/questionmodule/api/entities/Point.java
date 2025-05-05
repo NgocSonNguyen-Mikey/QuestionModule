@@ -17,10 +17,10 @@ public class Point {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "code", nullable = true)
+    @Column(name = "code", nullable = false)
     private String code;
 
-    @Column(name = "content", nullable = true)
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne
@@ -32,6 +32,6 @@ public class Point {
 
     private String replaceBy;
 
-    @OneToOne(mappedBy = "point")
+    @OneToOne(mappedBy = "point", cascade = CascadeType.ALL)
     private GraphKnowledge graphKnowledge;
 }

@@ -1,0 +1,15 @@
+package rules;
+import vn.pipeline.Word;
+import java.util.List;
+import java.util.Map
+import org.example.questionmodule.api.entities.SentenceType
+dialect "java"
+
+global List<String> simpleSentences;
+
+rule "Split Compound Sentence"
+when
+    $sentence: Word( posTag.startsWith("N") || posTag.startsWith("V"), depLabel == "conj" || depLabel == "nmod" || depLabel == "obj" )
+then
+    simpleSentences.add($sentence.getForm());
+end

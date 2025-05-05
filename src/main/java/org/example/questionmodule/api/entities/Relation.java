@@ -24,17 +24,17 @@ public class Relation {
 
     private String meaning;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "relation_similar", joinColumns = @JoinColumn(name = "relation_id"))
     @Column(name = "similar")
     private Set<String> similar = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "relation_keyword", joinColumns = @JoinColumn(name = "relation_id"))
     @Column(name = "keyword")
     private Set<String> keyword = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "relation_prop", joinColumns = @JoinColumn(name = "relation_id"))
     @Column(name = "prop")
     private Set<String> prop = new HashSet<>();

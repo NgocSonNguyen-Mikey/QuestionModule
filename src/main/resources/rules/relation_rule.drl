@@ -1,0 +1,60 @@
+package rules;
+import vn.pipeline.Word;
+import java.util.List;
+import com.google.common.collect.Multimap;
+dialect "java"
+
+
+global Multimap<Integer, List<Word>> results;
+
+// =========================
+// VERB RULES
+// =========================
+
+rule "Extract Relation"
+when
+    $v: Word(depLabel in ("root", "vmod"), $vIdx: index, $vForm: form)
+then
+    results.put($v.getIndex(), List.of($v));
+end
+
+rule "Detect Root Verb"
+when
+    $word: Word(posTag.equals("V"))
+then
+    results.put($word.getIndex(), List.of($word));
+end
+
+rule "Detect Verb with Adverb"
+when
+    $verb: Word(posTag.startsWith("V"), $idx1 : index) // Động từ
+    $adv: Word(posTag == "R", depLabel == "advmod", head == $idx1, $idx2 : index) // Trạng từ
+    eval(Math.abs($idx1 - $idx2) == 1)
+then
+    results.put($verb.getIndex(), List.of($verb, $adv));
+end
+
+rule "Relation - Verb modifier"
+when
+    $mainVerb : Word(depLabel == "root", $idx1 : index)
+    $vmod : Word(depLabel == "vmod", head == $idx1, posTag matches "V.*", $idx2 : index)
+    eval(Math.abs($idx1 - $idx2) == 1)
+then
+    results.put($mainVerb.getIndex(), List.of($mainVerb, $vmod));
+end
+
+rule "Relation - Coordinated verbs"
+when
+    $verb1 : Word(posTag matches "V.*", depLabel == "root", $idx1 : index)
+    $verb2 : Word(posTag matches "V.*", depLabel in ("conj", "coord"), head == $idx1, $idx2 : index)
+    eval(Math.abs($idx1 - $idx2) == 1)
+then
+    results.put($verb1.getIndex(), List.of($verb1, $verb2));
+end
+
+rule "Relation - Cap"
+when
+   $verb1 : Word(form.equalsIgnoreCase("cấp"))
+then
+    results.put($verb1.getIndex(), List.of($verb1));
+end

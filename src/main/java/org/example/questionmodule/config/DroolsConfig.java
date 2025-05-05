@@ -20,7 +20,6 @@ public class DroolsConfig {
 
 //    @Bean
     public KieContainer getKieContainer(String ruleFileName) throws IOException {
-//        KieServices kieServices = KieServices.Factory.get();
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
 
         // Đọc tất cả file DRL trong thư mục rules

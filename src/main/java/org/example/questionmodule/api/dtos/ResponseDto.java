@@ -1,0 +1,18 @@
+package org.example.questionmodule.api.dtos;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ResponseDto {
+    String question;
+    String answer;
+    List<LawDto> attachedLaw;
+}

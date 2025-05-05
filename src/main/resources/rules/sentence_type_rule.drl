@@ -1,0 +1,31 @@
+package rules;
+import vn.pipeline.Word;
+import java.util.List;
+import java.util.Map
+import org.example.questionmodule.api.entities.SentenceType
+dialect "java"
+
+global List<SentenceType> sentenceTypes;
+
+rule "Detect Negative Sentence Before Verb"
+when
+    $negWord: Word( form == "không" || form == "chưa" || form == "chẳng", depLabel == "adv" )
+    $verb: Word( posTag.startsWith("V"), depLabel == "root", index == $negWord.getHead() )
+then
+    sentenceTypes.add(SentenceType.NEGATIVE);
+end
+
+rule "Detect Negative Question"
+when
+    Word( form == "không" || form == "chưa", depLabel == "root" )
+then
+        sentenceTypes.add(SentenceType.QUESTION);
+end
+
+rule "Detect Affirmative Sentence"
+when
+    not( Word( form == "không" || form == "chưa" || form == "chẳng" ) )
+then
+        sentenceTypes.add(SentenceType.AFFIRMATIVE);
+end
+

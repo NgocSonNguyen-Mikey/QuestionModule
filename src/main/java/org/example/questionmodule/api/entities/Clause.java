@@ -20,7 +20,7 @@ public class Clause {
     @Column(name = "code", nullable = false)
     private String code;
 
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne
@@ -32,13 +32,14 @@ public class Clause {
 
     @OneToMany(
             mappedBy = "clause",
-            fetch = FetchType.LAZY
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
     )
     private List<Point> points;
 
     private String replaceBy;
 
-    @OneToOne(mappedBy = "clause")
+    @OneToOne(mappedBy = "clause",cascade = CascadeType.ALL)
     private GraphKnowledge graphKnowledge;
 
 }

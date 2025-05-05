@@ -1,51 +1,164 @@
 package rules;
 import vn.pipeline.Word;
 import java.util.List;
+import com.google.common.collect.Multimap;
 dialect "java"
 
-global List<String> subjects;
+global Multimap<Integer, List<Word>> results;
+
+// =========================
+// SUBJECT RULES
+// =========================
+
+//rule "Extract Subject"
+//when
+//    $s: Word(depLabel == "sub", $sIdx: index, $sForm: form)
+//    $mod: Word(depLabel == "nmod", head == $sIdx, $idx1 : index)
+//    eval(Math.abs($idx1 - $sIdx) == 1)
+//then
+//    results.put($s.getIndex(), List.of($s, $mod));
+//end
 
 rule "Detect Subject from Root Noun"
 when
-    $word: Word( posTag.startsWith("N"), depLabel == "root" || depLabel == "sub" )
+    $word: Word(posTag.startsWith("N"), depLabel == "root" || depLabel == "sub")
 then
-    subjects.add($word.getForm());
+    results.put($word.getIndex(), List.of($word));
 end
 
 rule "Detect Subject from Verb Phrase"
 when
-    $root: Word( posTag.startsWith("V"), depLabel == "root" )
-    $modifier: Word( depLabel == "vmod", head == $root.getIndex() )
+    $root: Word(posTag.startsWith("V"), depLabel == "root", $idx1 : index)
+    $modifier: Word(depLabel == "vmod" || depLabel == "dob", head == $idx1, $idx2 : index)
+    eval(Math.abs($idx1 - $idx2) == 1)
 then
-    subjects.add($root.getForm() + " " + $modifier.getForm());
+    results.put($root.getIndex(), List.of($root, $modifier));
 end
 
 rule "Detect Subject from Dependent Noun"
 when
-    $word: Word( posTag.startsWith("N"), depLabel == "dob" || depLabel == "nmod" )
+    $word: Word(posTag.startsWith("N"), depLabel == "dob" || depLabel == "nmod")
 then
-    subjects.add($word.getForm());
+    results.put($word.getIndex(), List.of($word));
 end
 
 rule "Detect Subject from Coordination"
 when
-    $word: Word( posTag.startsWith("N"), depLabel == "dob" || depLabel == "nmod" )
-    $conj: Word( depLabel == "conj", head == $word.getIndex() )
+    $word: Word(posTag.startsWith("N"), depLabel == "dob" || depLabel == "nmod", $idx1 : index)
+    $conj: Word(depLabel == "conj", head == $idx1, $idx2 : index)
+    eval(Math.abs($idx1 - $idx2) == 1)
 then
-    subjects.add($word.getForm() + $conj.getForm());
+    results.put($word.getIndex(), List.of($word, $conj));
 end
+
+rule "Subject - Expand nmod or det"
+when
+    $subject : Word(depLabel == "sub", $idx : index)
+    $mod : Word(depLabel in ("nmod", "det"), head == $idx, $idx2 : index)
+    eval(Math.abs($idx - $idx2) == 1)
+then
+    results.put($subject.getIndex(), List.of($subject, $mod));
+end
+
+rule "Subject - From Root Verb"
+when
+    $root : Word(depLabel == "root", $idx : index)
+    $subject : Word(posTag matches "N.*", head == $idx, $idx2 : index)
+    eval(Math.abs($idx - $idx2) == 1)
+then
+    results.put($root.getIndex(), List.of($root, $subject));
+end
+
+// =========================
+// OBJECT RULES
+// =========================
+
+rule "Detect Object from Direct Object"
+when
+    $word: Word(posTag.startsWith("N"), depLabel == "dob" || depLabel == "obj")
+then
+    results.put($word.getIndex(), List.of($word));
+end
+
+rule "Object - Expand nmod/det"
+when
+    $obj : Word(depLabel == "dob", $idx : index)
+    $mod : Word(depLabel in ("nmod", "det"), head == $idx, $idx2 : index)
+    eval(Math.abs($idx - $idx2) == 1)
+then
+    results.put($obj.getIndex(), List.of($obj, $mod));
+end
+
+rule "Object - Verb-based guess"
+when
+    $verb : Word(posTag matches "V.*", $idx : index)
+    $obj : Word(posTag matches "N.*", head == $idx, depLabel != "sub", $idx2 : index)
+    eval(Math.abs($idx - $idx2) == 1)
+then
+    results.put($verb.getIndex(), List.of($verb, $obj));
+end
+
+rule "Object - Coordination"
+when
+    $obj1 : Word(depLabel == "dob", $head : head, $idx1 : index)
+    $obj2 : Word(depLabel == "coord", head == $head, $idx2 : index)
+    eval(Math.abs($idx1 - $idx2) == 1)
+then
+    results.put($obj1.getIndex(), List.of($obj1, $obj2));
+end
+
+// =========================
+// NOUN PHRASES & COMPOUNDS
+// =========================
+
 rule "Detect Compound Noun Phrase"
 when
-    $head: Word( posTag.startsWith("V"), depLabel == "vmod" ) // Động từ đứng trước
-    $modifier: Word( posTag.startsWith("N"), depLabel == "dob", head == $head.getIndex() ) // Danh từ bổ nghĩa
+    $head: Word(posTag.startsWith("V"), depLabel == "vmod", $idx1 : index)
+    $modifier: Word(posTag.startsWith("N"), depLabel == "dob", head == $idx1, $idx2 : index)
+    eval(Math.abs($idx1 - $idx2) == 1)
 then
-    subjects.add($head.getForm() + " " + $modifier.getForm());
+    results.put($head.getIndex(), List.of($head, $modifier));
 end
 
 rule "Detect Double Noun Phrase"
 when
-    $head: Word( posTag.startsWith("N") ) // Danh từ
-    $modifier: Word( posTag.startsWith("N"), depLabel == "nmod", head == $head.getIndex() ) // Danh từ bổ nghĩa
+    $head: Word(posTag.startsWith("N"), $idx1 : index)
+    $modifier: Word(posTag.startsWith("N"), depLabel == "nmod", head == $idx1, $idx2 : index)
+    eval(Math.abs($idx1 - $idx2) == 1)
 then
-    subjects.add($head.getForm() + " " + $modifier.getForm());
+    results.put($head.getIndex(), List.of($head, $modifier));
+end
+
+rule "Detect Noun + Pronoun"
+when
+    $noun: Word(posTag.startsWith("N"), depLabel in ("nmod", "subj", "sub"), $idx1 : index)
+    $pronoun: Word(posTag.startsWith("P"), depLabel == "det", head == $idx1, $idx2 : index)
+    eval(Math.abs($idx1 - $idx2) == 1)
+then
+    results.put($noun.getIndex(), List.of($noun, $pronoun));
+end
+
+// =========================
+// OTHER RULES
+// =========================
+
+rule "Detect Noun"
+when
+    $word: Word(posTag.startsWith("N"))
+then
+    results.put($word.getIndex(), List.of($word));
+end
+
+rule "Detect Object from Noun Modifier"
+when
+    $word: Word(posTag.startsWith("N"), depLabel == "nmod")
+then
+    results.put($word.getIndex(), List.of($word));
+end
+
+rule "Special Noun"
+when
+    $noun: Word(form.equals("giao_dịch"))
+then
+    results.put($noun.getIndex(), List.of($noun));
 end
