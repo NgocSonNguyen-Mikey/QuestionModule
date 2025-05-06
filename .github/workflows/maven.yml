@@ -21,7 +21,7 @@ jobs:
       - name: Copy files to VPS
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd /home/ubuntu/auth-server
+            cd /home/son/questionModule/QuestionModule
             git pull origin main
             docker-compose down
             docker-compose build --no-cache
