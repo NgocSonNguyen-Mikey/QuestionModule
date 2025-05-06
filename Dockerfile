@@ -21,7 +21,10 @@ COPY --from=builder /app/target/*.jar app.jar
 
 # Copy VnCoreNLP jar và models cùng cấp
 COPY --from=builder /app/src/main/resources/libs/VnCoreNLP-1.2.jar /app/libs/VnCoreNLP-1.2.jar
-COPY models/ /app/libs/models/
+COPY --from=builder /app/src/main/resources/libs/models/ /app/libs/models/
 
-# Chạy Spring Boot app với classpath chứa VnCoreNLP
+# Kiểm tra nội dung trong thư mục libs (debug)
+RUN echo "===== /app/libs =====" && ls -al /app/libs && echo "===== /app/libs/models =====" && ls -al /app/libs/models/
+
+# Chạy với classpath chứa VnCoreNLP
 ENTRYPOINT ["java", "-Xms2g", "-Xmx2g", "-cp", "app.jar:libs/VnCoreNLP-1.2.jar", "org.springframework.boot.loader.JarLauncher"]
