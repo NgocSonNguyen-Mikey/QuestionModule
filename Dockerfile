@@ -1,4 +1,4 @@
-FROM maven:3.8.4-openjdk-19 AS builder
+FROM maven:3.9.5-eclipse-temurin-19 AS builder
 WORKDIR /app
 
 COPY pom.xml .
@@ -6,7 +6,7 @@ COPY src ./src
 
 RUN mvn clean package -DskipTests
 
-FROM openjdk:19-jdk-slim
+FROM eclipse-temurin:19-jdk-alpine
 
 WORKDIR /app
 
