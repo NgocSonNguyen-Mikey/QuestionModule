@@ -10,8 +10,8 @@ FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
 COPY --from=builder /app/target/*.jar app.jar
-COPY ./libs/VnCoreNLP-1.2.jar /app/libs/VnCoreNLP-1.2.jar
-COPY ./libs/models /app/libs/models/
+COPY src/main/resources/libs/VnCoreNLP-1.2.jar /app/libs/VnCoreNLP-1.2.jar
+COPY src/main/resources/libs/models /app/libs/models/
 
 # Debug: kiểm tra trong lúc build
 RUN echo "== JAR FILES ==" && ls -al /app && \

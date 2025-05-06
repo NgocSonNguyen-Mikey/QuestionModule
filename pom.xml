@@ -48,7 +48,7 @@
             <artifactId>vncorenlp</artifactId>
             <version>1.2</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/VnCoreNLP-1.2.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/libs/VnCoreNLP-1.2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
