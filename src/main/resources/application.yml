@@ -53,6 +53,3 @@ jwt:
 clerk:
   api:
     secret-key: ${CLERK_API_SECRET_KEY}
-word2vec:
-  model:
-    path: ${WORD2VEC_MODEL_PATH}

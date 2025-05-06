@@ -17,11 +17,7 @@ public class Word2VecService {
     private Word2Vec wordVectors;
     private volatile boolean loading = false;
 
-    @Value("${word2vec.model.path}")
-    private String modelPath;
-
-    @PostConstruct
-    public void init() {
+    public Word2VecService() {
         // Nạp mô hình trong thread riêng khi service khởi tạo
         new Thread(this::loadModel).start();
 //        wordVectors = new Word2Vec();
@@ -29,14 +25,10 @@ public class Word2VecService {
 
     private void loadModel() {
         try {
-            loading = true;// Đổi lại đúng đường dẫn trên máy bạn
-            System.out.println(modelPath);
-            File modelFile = new File(modelPath);
-
-            if (!modelFile.exists()) {
-                throw new IOException("Model file not found: " + modelFile.getAbsolutePath());
-            }
-                this.wordVectors = WordVectorSerializer.readWord2VecModel(modelFile, true); // <- Đúng cho file .vec
+            loading = true;
+            ClassPathResource resource = new ClassPathResource("word2vec_model/baomoi.model.bin");
+            File modelFile = resource.getFile();
+            this.wordVectors = WordVectorSerializer.readWord2VecModel(modelFile, true); // <- Đúng cho file .vec
             System.out.println("✅ Word2Vec model loaded successfully.");
 
 //                WordVectorSerializer.writeWord2VecModel((Word2Vec) this.wordVectors, binOutput);
