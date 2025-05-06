@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY pom.xml .
 COPY src ./src
+COPY src/main/resources/libs/VnCoreNLP-1.2.jar src/main/resources/libs/VnCoreNLP-1.2.jar
+COPY src/main/resources/libs/models /app/libs/models
 RUN mvn clean package -DskipTests
 
 # ================ RUNTIME STAGE =================
@@ -14,7 +16,7 @@ WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
 # Copy VnCoreNLP và models vào container
-COPY src/main/resources/libs /app/libs
+COPY --from=builder /app/libs /app/libs
 
 # Chạy app với classpath có cả app.jar và VnCoreNLP.jar
 ENTRYPOINT ["java", "-Xms2g", "-Xmx2g", "-jar", "app.jar"]
