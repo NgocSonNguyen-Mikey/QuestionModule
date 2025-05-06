@@ -26,7 +26,7 @@ public class Word2VecService {
     private void loadModel() {
         try {
             loading = true;
-            ClassPathResource resource = new ClassPathResource("word2vec_model/baomoi.model.bin");
+            ClassPathResource resource = new ClassPathResource("word2vec_mode/baomoi.model.bin");
             File modelFile = resource.getFile();
             this.wordVectors = WordVectorSerializer.readWord2VecModel(modelFile, true); // <- Đúng cho file .vec
             System.out.println("✅ Word2Vec model loaded successfully.");
