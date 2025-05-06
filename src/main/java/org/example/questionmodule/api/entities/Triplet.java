@@ -42,6 +42,6 @@ public class Triplet {
     )
     private Relation relation;
 
-    @OneToMany(mappedBy = "triplet", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "triplet", fetch = FetchType.LAZY)
     private List<TripletGraph> tripletGraphs;
 }

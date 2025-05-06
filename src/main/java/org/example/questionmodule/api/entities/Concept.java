@@ -20,7 +20,7 @@ public class Concept {
     @Column(name = "id", nullable = false)
     private String id;
 
-    @Column(name = "name", nullable = false, unique = true, length = 500)
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
 
     @Column(name = "meaning", nullable = true)

@@ -131,9 +131,9 @@ public class AsyncService {
     }
 
     public void addGraphsForLaw(Law law) {
-        List<Concept> concepts = conceptRepository.findAll();
-        List<Relation> relations = relationRepository.findAll();
-        List<Triplet> existingTriplets = tripletRepository.findAll();
+        List<Concept> concepts = conceptRepository.findAllQuery();
+        List<Relation> relations = relationRepository.findAllQuery();
+        List<Triplet> existingTriplets = tripletRepository.findAllQuery();
 
         List<GraphKnowledge> graphList = new ArrayList<>();
         List<List<Triplet>> allTripletGroups = new ArrayList<>(); // lưu tạm các triplet theo thứ tự

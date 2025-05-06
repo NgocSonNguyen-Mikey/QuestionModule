@@ -12,12 +12,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/api/load/")
+@RequestMapping("/api/load")
 @RequiredArgsConstructor
 public class LoadDocController {
     private final LoadDocService loadDocService;
 
-    @PostMapping("/")
+    @PostMapping()
     public ResponseEntity<String> test(@RequestParam("file") MultipartFile file) throws IOException {
         loadDocService.loadDoc(file);
         return ResponseEntity.ok("Success");

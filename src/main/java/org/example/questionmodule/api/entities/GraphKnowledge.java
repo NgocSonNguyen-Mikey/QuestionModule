@@ -18,7 +18,9 @@ public class GraphKnowledge {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "graphKnowledge")
+    @OneToMany(cascade = {CascadeType.PERSIST,
+            CascadeType.MERGE}, mappedBy = "graphKnowledge",
+            fetch = FetchType.LAZY)
     private List<TripletGraph> tripletGraphs;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
