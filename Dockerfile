@@ -17,4 +17,4 @@ COPY --from=builder /app/target/*.jar app.jar
 COPY src/main/resources/libs /app/libs
 
 # Chạy app với classpath có cả app.jar và VnCoreNLP.jar
-ENTRYPOINT ["java", "-Xms2g", "-Xmx2g", "-cp", "app.jar:libs/VnCoreNLP-1.2.jar", "org.springframework.boot.loader.JarLauncher"]
+ENTRYPOINT ["java", "-Xms2g", "-Xmx2g", "-jar", "app.jar"]
