@@ -32,6 +32,9 @@ public class Point {
 
     private String replaceBy;
 
+    @Column(name = "has_graph", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean hasGraph = false;
+
     @OneToOne(mappedBy = "point", cascade = CascadeType.ALL)
     private GraphKnowledge graphKnowledge;
 }

@@ -7,9 +7,19 @@ import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.example.questionmodule.api.dtos.admin.ArticleDto;
+import org.example.questionmodule.api.dtos.admin.ClauseDto;
+import org.example.questionmodule.api.dtos.admin.LawDto;
+import org.example.questionmodule.api.dtos.admin.PointDto;
+import org.example.questionmodule.api.entities.*;
+import org.example.questionmodule.api.repositories.*;
 import org.example.questionmodule.api.services.interfaces.LoadDocService;
+import org.example.questionmodule.api.services.mapper.*;
+import org.example.questionmodule.utils.exceptions.DataNotFoundException;
 import org.springframework.ai.document.Document;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import vn.pipeline.Sentence;
 import vn.pipeline.Word;
@@ -27,7 +37,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DefaultLoadDocService implements LoadDocService {
 
+    private final ConceptRepository conceptRepository;
+    private final RelationRepository relationRepository;
+    private final TripletRepository tripletRepository;
+    private final GraphKnowledgeRepository graphKnowledgeRepository;
     private final AsyncService asyncService;
+    private final LawMapper lawMapper;
+    private final TripletGraphRepository tripletGraphRepository;
+    private final ArticleRepository articleRepository;
+    private final ClauseRepository clauseRepository;
+    private final PointRepository pointRepository;
 
 
     @Override
@@ -62,6 +81,104 @@ public class DefaultLoadDocService implements LoadDocService {
         }
 
         return null;
+    }
+
+    @Override
+    public LawDto onlyLoadDoc(MultipartFile file) throws IOException {
+        String text = readWordFile(file);
+        List<Document> documents = parseLawText(text);
+        for (Document doc : documents) {
+            System.out.println("====== Document " + (doc.getId()) + " ======");
+            System.out.println("Metadata: ");
+
+            Map<String, Object> metadata = doc.getMetadata();
+            for (Map.Entry<String, Object> entry : metadata.entrySet()) {
+                System.out.println("- " + entry.getKey() + ": " + entry.getValue());
+            }
+
+            System.out.println(); // Dòng trống phân cách
+        }
+        var law = asyncService.saveLawDoc(documents);
+        return lawMapper.toAdminDto(law);
+    }
+
+    @Override
+    @Transactional
+    @Async
+    public void createTripletOfArticle(String id){
+        List<Concept> concepts = conceptRepository.findAllQuery();
+        List<Relation> relations = relationRepository.findAllQuery();
+        List<Triplet> existingTriplets = tripletRepository.findAllQuery();
+
+        Article article = articleRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException(List.of("Article not found")));
+        article.setHasGraph(true);
+        GraphKnowledge gk = GraphKnowledge.builder().article(article).build();
+
+
+        List<Triplet> triplets = new ArrayList<>(asyncService.process(article.getTitle(), concepts, relations, existingTriplets));
+        if (article.getContent() != null) triplets.addAll(asyncService.process(article.getContent(), concepts, relations, existingTriplets));
+
+        saveTripletGraph(gk, triplets);
+        articleRepository.save(article);
+    }
+
+    @Override
+    @Transactional
+    @Async
+    public void createTripletOfClause(String id){
+        List<Concept> concepts = conceptRepository.findAllQuery();
+        List<Relation> relations = relationRepository.findAllQuery();
+        List<Triplet> existingTriplets = tripletRepository.findAllQuery();
+
+        Clause clause = clauseRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException(List.of("Clause not found")));
+        clause.setHasGraph(true);
+        GraphKnowledge gk = GraphKnowledge.builder().clause(clause).build();
+
+
+        List<Triplet> triplets = asyncService.process(clause.getContent(), concepts, relations, existingTriplets);
+
+       saveTripletGraph(gk, triplets);
+       clauseRepository.save(clause);
+    }
+
+    @Override
+    @Transactional
+    @Async
+    public void createTripletOfPoint(String id){
+        List<Concept> concepts = conceptRepository.findAllQuery();
+        List<Relation> relations = relationRepository.findAllQuery();
+        List<Triplet> existingTriplets = tripletRepository.findAllQuery();
+
+        Point point = pointRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException(List.of("Point not found")));
+        point.setHasGraph(true);
+        GraphKnowledge gk = GraphKnowledge.builder().point(point).build();
+        long start = System.currentTimeMillis();
+        List<Triplet> triplets = asyncService.process(point.getContent(), concepts, relations, existingTriplets);
+        System.out.println("Process time = " + (System.currentTimeMillis() - start) + " ms");
+        saveTripletGraph(gk, triplets);
+        pointRepository.save(point);
+    }
+
+    private void saveTripletGraph(GraphKnowledge graphKnowledge, List<Triplet> triplets){
+        var gk = graphKnowledgeRepository.save(graphKnowledge);
+        List<TripletGraph> tripletGraphs = new ArrayList<>();
+        Set<String> existingKeys = new HashSet<>();
+        for (int j = 0; j < triplets.size(); j++) {
+            Triplet triplet = triplets.get(j);
+            String key = gk.getId() + "-" + triplet.getId();
+            if (!existingKeys.contains(key)) {
+                TripletGraph tg = new TripletGraph();
+                tg.setTriplet(triplet);
+                tg.setGraphKnowledge(gk);
+                tg.setIsRoot(j == 0);
+                tripletGraphs.add(tg);
+                existingKeys.add(key);
+            }
+        }
+        tripletGraphRepository.saveAll(tripletGraphs);
     }
 
     public String readPdfContent(MultipartFile file) throws IOException {
@@ -111,6 +228,17 @@ public class DefaultLoadDocService implements LoadDocService {
         Matcher lawTitleMatcher = Pattern.compile("(?m)^LUẬT\\s+([A-ZÀ-Ỹ\\s]+)$").matcher(fullText);
         if (lawTitleMatcher.find()) {
             tenLuat = "LUẬT " + lawTitleMatcher.group(1).trim();
+        }
+
+        if (Objects.equals(luatSo, "")) {
+            Matcher decreeNumberMatcher = Pattern.compile("Số:\\s*(\\S+)").matcher(fullText);
+            if (decreeNumberMatcher.find()) {
+                luatSo = decreeNumberMatcher.group(1);
+                Matcher decreeTitleMatcher = Pattern.compile("(?m)^NGHỊ ĐỊNH\\s+([A-ZÀ-Ỹ0-9\\s,–-]+)$").matcher(fullText);
+                if (decreeTitleMatcher.find()) {
+                    tenLuat = "NGHỊ ĐỊNH " + decreeTitleMatcher.group(1).trim();
+                }
+            }
         }
 
         // 3. Đọc tên chương hiện tại

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TripletRepository extends JpaRepository<Triplet, String> {
@@ -18,7 +19,7 @@ public interface TripletRepository extends JpaRepository<Triplet, String> {
             "WHERE t.subject.id LIKE ?1 "+
             "AND t.object.id LIKE ?2 "+
             "AND t.relation.id LIKE ?3")
-    List<Triplet> getGraphFromTriplet(String subject_id, String object_id, String relation_id);
+    Optional<Triplet> getTriplet(String subject_id, String object_id, String relation_id);
 
     @Query("SELECT t FROM Triplet t " +
             "left JOIN FETCH t.subject " +

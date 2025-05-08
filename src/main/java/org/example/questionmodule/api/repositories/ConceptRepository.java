@@ -10,9 +10,10 @@ import java.util.Optional;
 
 @Repository
 public interface ConceptRepository extends JpaRepository<Concept, String> {
-    public Optional<Concept> findByName(String name);
+    Optional<Concept> findByName(String name);
     @Query("SELECT c FROM Concept c" +
             " left join FETCH c.keyphrases"+
             " left join FETCH c.similar")
     List<Concept> findAllQuery();
+
 }

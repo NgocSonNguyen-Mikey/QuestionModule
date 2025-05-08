@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RelationRepository extends JpaRepository<Relation, String> {
@@ -15,4 +16,6 @@ public interface RelationRepository extends JpaRepository<Relation, String> {
             " left join FETCH r.keyword"+
             " left join FETCH r.similar")
     List<Relation> findAllQuery();
+
+    Optional<Relation> findByName(String s);
 }

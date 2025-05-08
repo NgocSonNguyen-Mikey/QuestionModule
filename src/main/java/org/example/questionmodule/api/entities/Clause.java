@@ -39,6 +39,9 @@ public class Clause {
 
     private String replaceBy;
 
+    @Column(name = "has_graph", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean hasGraph = false;
+
     @OneToOne(mappedBy = "clause",cascade = CascadeType.ALL)
     private GraphKnowledge graphKnowledge;
 

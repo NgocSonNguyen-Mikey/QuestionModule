@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TripletDto {
-    private String id;
-    private ConceptDto subject;
-    private RelationDto relation;
-    private ConceptDto object;
+public class TripletDelete {
+    private String tripletId;
 }

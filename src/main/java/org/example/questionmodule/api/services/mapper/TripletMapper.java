@@ -16,6 +16,7 @@ public  interface TripletMapper {
     @Mapping(source = "object.name", target = "object")
     TripleDto toDto(Triplet triplet);
 
+    @Mapping(source = "id", target = "id")
     org.example.questionmodule.api.dtos.admin.TripletDto toAdminDto(Triplet triplet);
 
     List<org.example.questionmodule.api.dtos.admin.TripletDto> toAdminDtoList(List<Triplet> triplets);

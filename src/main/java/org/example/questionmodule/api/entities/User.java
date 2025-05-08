@@ -20,7 +20,6 @@ import java.util.List;
 @Table(name = "users")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
     private String id;
 
@@ -29,7 +28,7 @@ public class User implements UserDetails {
     @Column(name = "username", unique = true, nullable = true)
     private String username;
 
-    @Column(name = "password", length = 500, nullable = false)
+    @Column(name = "password", length = 500, nullable = true)
     private String password;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)

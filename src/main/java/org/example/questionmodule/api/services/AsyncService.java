@@ -41,6 +41,14 @@ public class AsyncService {
     public void saveToDatabase(List<Document> documents) {
         if (documents.isEmpty()) return ;
 
+        var saveLaw = saveLawDoc(documents);
+        addGraphsForLaw(saveLaw);
+
+    }
+
+    public Law saveLawDoc(List<Document> documents){
+        if (documents.isEmpty()) return new Law();
+
         Document first = documents.get(0);
         String lawTitle = (String) first.getMetadata().get("lawTitle");
         String lawNumber = (String) first.getMetadata().get("lawNumber");
@@ -125,9 +133,7 @@ public class AsyncService {
             c.setPoints(points.stream().filter(p -> p.getClause().equals(c)).collect(Collectors.toList()));
 
         law.setChapters(chapters);
-        Law saveLaw = lawRepository.save(law);
-        addGraphsForLaw(saveLaw);
-
+        return lawRepository.save(law);
     }
 
     public void addGraphsForLaw(Law law) {
@@ -143,8 +149,8 @@ public class AsyncService {
             for (Article a : ch.getArticles()) {
                 // Article
                 GraphKnowledge gkArticle = GraphKnowledge.builder().article(a).build();
-                List<Triplet> articleTriplets = new ArrayList<>();
-                articleTriplets.addAll(process(a.getTitle(), concepts, relations, existingTriplets));
+                a.setHasGraph(true);
+                List<Triplet> articleTriplets = new ArrayList<>(process(a.getTitle(), concepts, relations, existingTriplets));
                 if (a.getContent() != null) {
                     articleTriplets.addAll(process(a.getContent(), concepts, relations, existingTriplets));
                 }
@@ -153,6 +159,7 @@ public class AsyncService {
 
                 for (Clause c : a.getClauses()) {
                     // Clause
+                    c.setHasGraph(true);
                     GraphKnowledge gkClause = GraphKnowledge.builder().clause(c).build();
                     List<Triplet> clauseTriplets = process(c.getContent(), concepts, relations, existingTriplets);
                     graphList.add(gkClause);
@@ -160,6 +167,7 @@ public class AsyncService {
 
                     for (Point p : c.getPoints()) {
                         // Point
+                        p.setHasGraph(true);
                         GraphKnowledge gkPoint = GraphKnowledge.builder().point(p).build();
                         List<Triplet> pointTriplets = process(p.getContent(), concepts, relations, existingTriplets);
                         graphList.add(gkPoint);

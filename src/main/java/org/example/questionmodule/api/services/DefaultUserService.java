@@ -1,6 +1,7 @@
 package org.example.questionmodule.api.services;
 
 import lombok.RequiredArgsConstructor;
+import org.example.questionmodule.api.dtos.auth.LoginRequest;
 import org.example.questionmodule.api.entities.Role;
 import org.example.questionmodule.api.entities.User;
 import org.example.questionmodule.api.repositories.RoleRepository;
@@ -76,7 +77,18 @@ public class DefaultUserService implements UserService {
                 .build();
     }
 
-//    @Override
+    @Override
+    public String login(LoginRequest loginRequest) {
+        var user = userRepository.findById(loginRequest.getId());
+        if(user.isPresent()) return "success";
+        userRepository.save(User.builder()
+                        .id(loginRequest.getId())
+                        .fullName(loginRequest.getFullname())
+                .build());
+        return "success";
+    }
+
+    //    @Override
     public Boolean checkPassword(String token, String password) {
         var userEntity = getUserById(jwtService.extractSubject(jwtService.validateToken(token)));
         return passwordEncoder.matches(password, userEntity.getPassword());

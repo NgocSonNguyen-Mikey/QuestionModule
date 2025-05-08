@@ -44,6 +44,9 @@ public class Article {
 
     private String replaceBy;
 
+    @Column(name = "has_graph", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean hasGraph = false;
+
     @OneToOne(mappedBy = "article",cascade = CascadeType.ALL)
     private GraphKnowledge graphKnowledge;
 }
