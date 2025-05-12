@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.example.questionmodule.api.dtos.admin.ConceptDto;
 import org.example.questionmodule.api.dtos.admin.RelationDto;
 import org.example.questionmodule.api.services.interfaces.OntologyService;
+import org.example.questionmodule.utils.dtos.ListResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/ontology")
@@ -17,17 +20,13 @@ public class OntologyController {
     private final OntologyService ontologyService;
 
     @GetMapping("/concept")
-    public ResponseEntity<Page<ConceptDto>> getConcept(
-            @RequestParam int page,
-            @RequestParam int size){
-        return ResponseEntity.ok(ontologyService.getAllConcept(page, size));
+    public ResponseEntity<ListResponse<ConceptDto>> getConcept(){
+        return ResponseEntity.ok(ontologyService.getAllConcept());
     }
 
     @GetMapping("/relation")
-    public ResponseEntity<Page<RelationDto>> getRelation(
-            @RequestParam int page,
-            @RequestParam int size){
-        return ResponseEntity.ok(ontologyService.getAllRelation(page, size));
+    public ResponseEntity<ListResponse<RelationDto>> getRelation(){
+        return ResponseEntity.ok(ontologyService.getAllRelation());
     }
 
     @PutMapping("/relation/{id}")

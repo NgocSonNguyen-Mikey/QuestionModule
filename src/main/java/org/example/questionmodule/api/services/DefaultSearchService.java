@@ -204,7 +204,6 @@ public class DefaultSearchService implements SearchService {
         for (Map.Entry<Integer, Relation> entry : relations.entries()) {
             int relationIndex = entry.getKey();
             Relation relation = entry.getValue();
-            System.out.println(relation.getName());
             // Tìm subject và object (chỉ cần lặp qua concepts một lần)
             Concept subject = concepts.entries().stream()
                     .filter(conceptEntry -> conceptEntry.getKey() < relationIndex )//&& relation.getConceptSubjects().contains(conceptEntry.getValue())
@@ -218,7 +217,7 @@ public class DefaultSearchService implements SearchService {
 
             // Nếu tìm thấy subject và object thì tạo bộ ba
             if (subject != null && object != null) {
-                System.out.println(subject.getName() + " " + relation.getName() + " " + object.getName() + " " + sentenceType);
+//                System.out.println(subject.getName() + " " + relation.getName() + " " + object.getName() + " " + sentenceType);
                 triplets.add(Triplet.builder()
                         .subject(subject)
                         .object(object)
@@ -228,7 +227,7 @@ public class DefaultSearchService implements SearchService {
             }
             // Nếu không tìm thấy bộ ba, ghép bộ hai subject và relation
             else if (subject != null) {
-                System.out.println(subject.getName() + " " + relation.getName() + " (No object)" + " " + sentenceType);
+//                System.out.println(subject.getName() + " " + relation.getName() + " (No object)" + " " + sentenceType);
                 triplets.add(Triplet.builder()
                         .subject(subject)
                         .relation(relation)
@@ -237,7 +236,7 @@ public class DefaultSearchService implements SearchService {
             }
             // Nếu không tìm thấy bộ ba, ghép bộ hai relation và object
             else if (object != null) {
-                System.out.println(relation.getName() + " " + object.getName() + " (No subject)" + " " + sentenceType);
+//                System.out.println(relation.getName() + " " + object.getName() + " (No subject)" + " " + sentenceType);
                 triplets.add(Triplet.builder()
                         .object(object)
                         .relation(relation)
@@ -255,6 +254,7 @@ public class DefaultSearchService implements SearchService {
 
         // Duyệt từng bộ ba để lấy GraphKnowledge của nó
         for (Triplet triplet : tripletList) {
+            if (triplet.getTripletGraphs() == null) continue;
             List<GraphKnowledge> graphRoot = triplet.getTripletGraphs().stream()
                     .filter(TripletGraph::getIsRoot)
                     .toList().stream()
@@ -267,6 +267,7 @@ public class DefaultSearchService implements SearchService {
                     .map(TripletGraph::getGraphKnowledge)
                     .toList()
             ) {
+//                System.out.println("test");
                 graphCount.put(graph, graphCount.getOrDefault(graph, 0) + 1);
             }
         }
@@ -279,6 +280,7 @@ public class DefaultSearchService implements SearchService {
 
         // Tìm tập hợp Graph Knowledge phù hợp nhất
         int temp = result.size();
+//        System.out.println(sortedGraphs.size());
         for (int i = tripletList.size(); i > 0; i--) {
             Integer count = i;
             result = sortedGraphs.stream()
@@ -286,7 +288,7 @@ public class DefaultSearchService implements SearchService {
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
 
-            if (result.size() >= temp + 3) {
+            if (result.size() >= temp + 2) {
                 break; // Trả về danh sách GraphKnowledge tìm được
             }
         }
