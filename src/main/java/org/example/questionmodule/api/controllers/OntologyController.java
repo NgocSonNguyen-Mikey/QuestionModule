@@ -20,13 +20,17 @@ public class OntologyController {
     private final OntologyService ontologyService;
 
     @GetMapping("/concept")
-    public ResponseEntity<ListResponse<ConceptDto>> getConcept(){
-        return ResponseEntity.ok(ontologyService.getAllConcept());
+    public ResponseEntity<Page<ConceptDto>> getConcept(
+            @RequestParam int page,
+            @RequestParam int size){
+        return ResponseEntity.ok(ontologyService.getAllConcept(page, size));
     }
 
     @GetMapping("/relation")
-    public ResponseEntity<ListResponse<RelationDto>> getRelation(){
-        return ResponseEntity.ok(ontologyService.getAllRelation());
+    public ResponseEntity<Page<RelationDto>> getRelation(
+            @RequestParam int page,
+            @RequestParam int size){
+        return ResponseEntity.ok(ontologyService.getAllRelation(page, size));
     }
 
     @PutMapping("/relation/{id}")

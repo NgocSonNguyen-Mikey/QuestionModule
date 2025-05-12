@@ -34,21 +34,19 @@ public class DefaultOntologyService implements OntologyService {
     private final RelationMapper relationMapper;
 
     @Override
-    public ListResponse<ConceptDto> getAllConcept(){
-        List<Concept> concepts = conceptRepository.findAll();
-        return ListResponse.<ConceptDto>builder()
-                .size(concepts.size())
-                .data(concepts.stream().map(conceptMapper::toDto).toList())
-                .build();
+    public Page<ConceptDto> getAllConcept(Integer page, Integer size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Concept> concepts = conceptRepository.findAll(pageable);
+
+        return concepts.map(conceptMapper::toDto);
     }
 
     @Override
-    public ListResponse<RelationDto> getAllRelation() {
-        List<Relation> relations = relationRepository.findAll();
-        return ListResponse.<RelationDto>builder()
-                .size(relations.size())
-                .data(relations.stream().map(relationMapper::toDto).toList())
-                .build();
+    public Page<RelationDto> getAllRelation(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Relation> relations = relationRepository.findAll(pageable);
+
+        return relations.map(relationMapper::toDto);
     }
 
     @Override

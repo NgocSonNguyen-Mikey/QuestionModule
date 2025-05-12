@@ -8,8 +8,8 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface OntologyService {
-    ListResponse<ConceptDto> getAllConcept();
-    ListResponse<RelationDto> getAllRelation();
+    Page<ConceptDto> getAllConcept(Integer page, Integer size);
+    Page<RelationDto> getAllRelation(Integer page, Integer size);
     ConceptDto updateConcept(String id, ConceptDto dto);
     RelationDto updateRelation(String id, RelationDto dto);
     RelationDto createRelation(RelationDto dto);
