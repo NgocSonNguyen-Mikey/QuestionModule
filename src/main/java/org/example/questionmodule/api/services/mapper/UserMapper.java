@@ -1,5 +1,6 @@
 package org.example.questionmodule.api.services.mapper;
 
+import org.example.questionmodule.api.dtos.auth.UserDto;
 import org.example.questionmodule.api.entities.User;
 import org.example.questionmodule.api.dtos.auth.Register;
 import org.example.questionmodule.api.dtos.auth.UserResponse;
@@ -13,4 +14,7 @@ public interface UserMapper {
 
     @Mapping(source = "role.name", target = "role")
     UserResponse toResponse(User user);
+
+    @Mapping(source = "role.name", target = "role")
+    UserDto toDto(User user);
 }

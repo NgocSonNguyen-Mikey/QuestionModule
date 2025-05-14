@@ -1,16 +1,13 @@
 package org.example.questionmodule.api.services;
 
 import lombok.RequiredArgsConstructor;
-import org.example.questionmodule.api.dtos.auth.LoginRequest;
+import org.example.questionmodule.api.dtos.auth.*;
 import org.example.questionmodule.api.entities.Role;
 import org.example.questionmodule.api.entities.User;
 import org.example.questionmodule.api.repositories.RoleRepository;
 import org.example.questionmodule.api.repositories.UserRepository;
 import org.example.questionmodule.api.services.interfaces.UserService;
 import org.example.questionmodule.api.services.mapper.UserMapper;
-import org.example.questionmodule.api.dtos.auth.AuthRequest;
-import org.example.questionmodule.api.dtos.auth.AuthResponse;
-import org.example.questionmodule.api.dtos.auth.Register;
 import org.example.questionmodule.utils.exceptions.DataNotFoundException;
 import org.example.questionmodule.utils.exceptions.InternalServerException;
 import org.example.questionmodule.utils.service.JwtService;
@@ -18,6 +15,8 @@ import org.example.questionmodule.utils.validate.ObjectsValidator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,6 +39,16 @@ public class DefaultUserService implements UserService {
 
     private final ObjectsValidator<AuthRequest> authValidator;
 
+    private final JwtDecoder jwtDecoder;
+
+
+    public UserDto getRole(String token){
+        Jwt jwt = jwtDecoder.decode(token);
+        String id = jwt.getSubject();
+        var user = userRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException(List.of("User not found")));
+        return userMapper.toDto(user);
+    }
 
     @Override
     public AuthResponse register(Register user) {
