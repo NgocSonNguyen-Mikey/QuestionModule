@@ -5,6 +5,7 @@ import org.example.questionmodule.api.dtos.auth.LoginRequest;
 import org.example.questionmodule.api.dtos.auth.UserDto;
 import org.example.questionmodule.api.services.interfaces.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,8 +20,9 @@ public class AuthController {
     }
 
     @GetMapping("/role")
-    public ResponseEntity<UserDto> getRole(String token){
-        return ResponseEntity.ok(userService.getRole(token));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserDto> getRole(){
+        return ResponseEntity.ok(userService.getRole());
     }
 
 }

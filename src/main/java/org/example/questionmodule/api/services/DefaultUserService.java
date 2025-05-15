@@ -14,6 +14,8 @@ import org.example.questionmodule.utils.service.JwtService;
 import org.example.questionmodule.utils.validate.ObjectsValidator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -41,10 +43,9 @@ public class DefaultUserService implements UserService {
 
     private final JwtDecoder jwtDecoder;
 
-
-    public UserDto getRole(String token){
-        Jwt jwt = jwtDecoder.decode(token);
-        String id = jwt.getSubject();
+    @Override
+    public UserDto getRole(){
+        String id = getUserId();
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException(List.of("User not found")));
         return userMapper.toDto(user);
@@ -90,10 +91,13 @@ public class DefaultUserService implements UserService {
     public String login(LoginRequest loginRequest) {
         var user = userRepository.findById(loginRequest.getId());
         if(user.isPresent()) return "success";
-        userRepository.save(User.builder()
-                        .id(loginRequest.getId())
-                        .fullName(loginRequest.getFullname())
-                .build());
+        roleRepository.findById(2).ifPresent(role -> userRepository.save(User.builder()
+                .id(loginRequest.getId())
+                .fullName(loginRequest.getFullname())
+                .username(loginRequest.getEmail())
+                .password(loginRequest.getId())
+                .role(role)
+                .build()));
         return "success";
     }
 
@@ -106,6 +110,12 @@ public class DefaultUserService implements UserService {
     private User getUserById(String userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException( List.of("User is not exits")));
+    }
+
+    private String getUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        return jwt.getClaim("sub");
     }
 
 }

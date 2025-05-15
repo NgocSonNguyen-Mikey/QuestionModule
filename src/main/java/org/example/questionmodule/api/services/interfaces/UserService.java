@@ -6,5 +6,5 @@ public interface UserService {
     public AuthResponse register(Register user);
     public AuthResponse authenticate(AuthRequest authRequest);
     public String login(LoginRequest loginRequest);
-    UserDto getRole(String token);
+    UserDto getRole();
 }

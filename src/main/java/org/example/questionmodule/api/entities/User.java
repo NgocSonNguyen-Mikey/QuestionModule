@@ -28,7 +28,7 @@ public class User implements UserDetails {
     @Column(name = "username", unique = true, nullable = true)
     private String username;
 
-    @Column(name = "password", length = 500, nullable = true)
+    @Column(name = "password", unique = true, nullable = true)
     private String password;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
