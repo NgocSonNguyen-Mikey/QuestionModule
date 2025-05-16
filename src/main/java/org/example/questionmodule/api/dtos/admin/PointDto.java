@@ -20,8 +20,6 @@ public class PointDto {
 
     private String content;
 
-    private Clause clause;
-
     private String replaceBy;
 
     List<TripletDto> graph;
