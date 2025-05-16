@@ -13,8 +13,10 @@ import org.example.questionmodule.utils.exceptions.DataNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -37,6 +39,22 @@ public class DefaultLawService implements LawService {
     @Override
     public ListResponse<LawDto> getAllLaw(){
         List<Law> lawList = lawRepository.findAll();
+
+        lawList.forEach(law -> {
+            law.getChapters().sort(Comparator.comparing(Chapter::getCode));
+
+            law.getChapters().forEach(chapter -> {
+                chapter.getArticles().sort(Comparator.comparing(Article::getCode));
+
+                chapter.getArticles().forEach(article -> {
+                    article.getClauses().sort(Comparator.comparing(Clause::getCode));
+
+                    article.getClauses().forEach(clause -> {
+                        clause.getPoints().sort(Comparator.comparing(Point::getCode));
+                    });
+                });
+            });
+        });
         return ListResponse.<LawDto>builder()
                 .data(lawMapper.toAdminDtoList(lawList))
                 .size(lawList.size())

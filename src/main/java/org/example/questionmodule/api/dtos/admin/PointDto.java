@@ -23,4 +23,6 @@ public class PointDto {
     private String replaceBy;
 
     List<TripletDto> graph;
+    private Boolean hasGraph;
+
 }

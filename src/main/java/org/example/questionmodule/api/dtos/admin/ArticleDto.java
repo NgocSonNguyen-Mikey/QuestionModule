@@ -28,4 +28,6 @@ public class ArticleDto {
     private String replaceBy;
 
     List<TripletDto> graph;
+    private Boolean hasGraph;
+
 }

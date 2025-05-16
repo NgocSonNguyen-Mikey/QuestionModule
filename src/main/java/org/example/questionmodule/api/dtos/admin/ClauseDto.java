@@ -25,4 +25,6 @@ public class ClauseDto {
     private String replaceBy;
 
     List<TripletDto> graph;
+    private Boolean hasGraph;
+
 }
