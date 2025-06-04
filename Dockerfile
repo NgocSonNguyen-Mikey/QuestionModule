@@ -13,11 +13,11 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
-# Copy JAR app đã build từ stage trước
-COPY --from=build /app/target/your-app-name.jar app.jar
+# Copy JAR app đã build từ stage builder
+COPY --from=builder /app/target/your-app-name.jar app.jar
 
-# Copy file thư viện VnCoreNLP jar vào đúng vị trí
-COPY src/main/resources/libs/VnCoreNLP-1.2.jar /app/src/main/resources/libs/VnCoreNLP-1.2.jar
+# Copy file thư viện VnCoreNLP
+COPY src/main/resources/libs/VnCoreNLP-1.2.jar /app/libs/VnCoreNLP-1.2.jar
 
 # Chạy ứng dụng
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-cp", "app.jar:/app/libs/VnCoreNLP-1.2.jar", "org.springframework.boot.loader.JarLauncher"]
