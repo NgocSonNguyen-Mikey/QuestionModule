@@ -33,6 +33,16 @@ public class OntologyController {
         return ResponseEntity.ok(ontologyService.getAllRelation(page, size));
     }
 
+    @GetMapping("/concept/all")
+    public ListResponse<ConceptDto> getConceptNoPage(){
+        return ontologyService.getAllConceptNoPage();
+    }
+
+    @GetMapping("/relation/all")
+    public ListResponse<RelationDto> getRelationNoPage(){
+        return ontologyService.getAllRelationNoPage();
+    }
+
     @PutMapping("/relation/{id}")
     public ResponseEntity<RelationDto> updateRelation(
             @PathVariable String id,

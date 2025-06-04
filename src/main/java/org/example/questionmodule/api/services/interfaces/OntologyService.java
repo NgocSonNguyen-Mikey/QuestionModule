@@ -10,6 +10,9 @@ import java.util.List;
 public interface OntologyService {
     Page<ConceptDto> getAllConcept(Integer page, Integer size);
     Page<RelationDto> getAllRelation(Integer page, Integer size);
+
+    public ListResponse<ConceptDto> getAllConceptNoPage();
+    public ListResponse<RelationDto> getAllRelationNoPage();
     ConceptDto updateConcept(String id, ConceptDto dto);
     RelationDto updateRelation(String id, RelationDto dto);
     RelationDto createRelation(RelationDto dto);

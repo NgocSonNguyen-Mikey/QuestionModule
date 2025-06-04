@@ -4,6 +4,7 @@ import org.example.questionmodule.api.dtos.admin.*;
 import org.example.questionmodule.utils.dtos.ListResponse;
 
 public interface LawService {
+    ListResponse<LawDto> getLawsWithTripletsAttached();
     ListResponse<LawDto> getAllLaw();
     LawDto getLawById(String id);
     ChapterDto getChapterByCode(String lawId, String chapterCode);
@@ -16,5 +17,13 @@ public interface LawService {
     ArticleDto addTripletToArticle(String articleId, TripletRequest tripletRequest);
     PointDto addTripletToPoint(String pointId, TripletRequest tripletRequest);
     ClauseDto addTripletToClause(String clauseId, TripletRequest tripletRequest);
+
+    ChapterDto getChapterById(String chapterId);
+
+    ArticleDto getArticleById(String articleId);
+
+    ClauseDto getClauseById(String clauseId);
+
+    PointDto getPointById(String pointId);
 
 }

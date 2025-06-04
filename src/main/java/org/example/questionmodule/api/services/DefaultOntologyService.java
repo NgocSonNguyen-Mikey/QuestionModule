@@ -42,6 +42,26 @@ public class DefaultOntologyService implements OntologyService {
     }
 
     @Override
+    public ListResponse<RelationDto> getAllRelationNoPage() {
+        List<Relation> relations = relationRepository.findAllQuery();
+
+        return ListResponse.<RelationDto>builder()
+                .size(relations.size())
+                .data(relations.stream().map(relationMapper::toDto).toList())
+        .build();
+    }
+
+    @Override
+    public ListResponse<ConceptDto> getAllConceptNoPage(){
+        List<Concept> concepts = conceptRepository.findAllQuery();
+
+        return ListResponse.<ConceptDto>builder()
+                .size(concepts.size())
+                .data(concepts.stream().map(conceptMapper::toDto).toList())
+                .build();
+    }
+
+    @Override
     public Page<RelationDto> getAllRelation(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Relation> relations = relationRepository.findAll(pageable);

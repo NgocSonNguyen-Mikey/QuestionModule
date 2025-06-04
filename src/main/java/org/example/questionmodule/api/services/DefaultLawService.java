@@ -13,6 +13,7 @@ import org.example.questionmodule.utils.exceptions.DataNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @Service
 public class DefaultLawService implements LawService {
     private final LawRepository lawRepository;
+    private final ChapterRepository chapterRepository;
     private final ArticleRepository articleRepository;
     private final ClauseRepository clauseRepository;
     private final PointRepository pointRepository;
@@ -36,10 +38,72 @@ public class DefaultLawService implements LawService {
     private final PointMapper pointMapper;
     private final TripletGraphRepository tripletGraphRepository;
 
+    public ListResponse<LawDto> getLawsWithTripletsAttached() {
+        List<Law> laws = lawRepository.findAll();
+
+        // Sắp xếp từng law nếu cần
+        List<Law> sortedLaws = sort(laws);
+
+        // Ánh xạ sang DTO, đồng thời gắn triplet vào từng phần tử nếu có
+        List<LawDto> lawDtos = sortedLaws.stream()
+                .map(law -> {
+                    LawDto lawDto = lawMapper.toAdminDto(law);
+
+                    lawDto.getChapters().forEach(chapterDto ->
+                            chapterDto.getArticles().forEach(articleDto -> {
+
+                                // Triplet của Article
+                                Article articleEntity = findArticleEntity(law, chapterDto.getCode(), articleDto.getCode());
+                                if (articleEntity.getGraphKnowledge() != null) {
+                                    List<Triplet> triplets = extractTriplets(articleEntity.getGraphKnowledge());
+                                    articleDto.setGraph(tripletMapper.toAdminDtoList(triplets));
+                                }
+
+                                // Triplet của Clause
+                                articleDto.getClauses().forEach(clauseDto -> {
+                                    Clause clauseEntity = findClauseEntity(articleEntity, clauseDto.getCode());
+                                    if (clauseEntity != null && clauseEntity.getGraphKnowledge() != null) {
+                                        List<Triplet> triplets = extractTriplets(clauseEntity.getGraphKnowledge());
+                                        clauseDto.setGraph(tripletMapper.toAdminDtoList(triplets));
+                                    }
+
+                                    // Triplet của Point
+                                    clauseDto.getPoints().forEach(pointDto -> {
+                                        Point pointEntity = findPointEntity(clauseEntity, pointDto.getCode());
+                                        if (pointEntity != null && pointEntity.getGraphKnowledge() != null) {
+                                            List<Triplet> triplets = extractTriplets(pointEntity.getGraphKnowledge());
+                                            pointDto.setGraph(tripletMapper.toAdminDtoList(triplets));
+                                        }
+                                    });
+                                });
+
+                            })
+                    );
+
+                    return lawDto;
+                })
+                .collect(Collectors.toList());
+
+        return ListResponse.<LawDto>builder()
+                .data(lawDtos)
+                .size(lawDtos.size())
+                .build();
+    }
+
+
     @Override
     public ListResponse<LawDto> getAllLaw(){
         List<Law> lawList = lawRepository.findAll();
 
+        lawList = sort(lawList);
+
+        return ListResponse.<LawDto>builder()
+                .data(lawMapper.toAdminDtoList(lawList))
+                .size(lawList.size())
+                .build();
+    }
+
+    private List<Law> sort(List<Law> lawList){
         lawList.forEach(law -> {
             law.getChapters().sort(Comparator.comparing(Chapter::getCode));
 
@@ -55,16 +119,14 @@ public class DefaultLawService implements LawService {
                 });
             });
         });
-        return ListResponse.<LawDto>builder()
-                .data(lawMapper.toAdminDtoList(lawList))
-                .size(lawList.size())
-                .build();
+
+        return lawList;
     }
 
     @Override
     public LawDto getLawById(String id){
         Law lawEntity = lawRepository.findById(id).orElseThrow(() -> new DataNotFoundException(List.of("Law not found with id: " + id)));
-
+        lawEntity = sort(List.of(lawEntity)).stream().findFirst().orElseThrow();
         return lawMapper.toAdminDto(lawEntity);
 
     }
@@ -72,6 +134,8 @@ public class DefaultLawService implements LawService {
     @Override
     public ChapterDto getChapterByCode(String lawId, String chapterCode){
         Law lawEntity = lawRepository.findById(lawId).orElseThrow(() -> new DataNotFoundException(List.of("Law not found with id: " + lawId)));
+        lawEntity = sort(List.of(lawEntity)).stream().findFirst().orElseThrow();
+
         Chapter chapterEntity = lawEntity.getChapters().stream()
                 .filter(c -> c.getCode().equals(chapterCode))
                 .findFirst()
@@ -83,6 +147,8 @@ public class DefaultLawService implements LawService {
     @Override
     public ArticleDto getArticleByCode(String lawId, String chapterCode, String articleCode){
         Law lawEntity = lawRepository.findById(lawId).orElseThrow(() -> new DataNotFoundException(List.of("Law not found with id: " + lawId)));
+        lawEntity = sort(List.of(lawEntity)).stream().findFirst().orElseThrow();
+
         Chapter chapterEntity = lawEntity.getChapters().stream()
                 .filter(c -> c.getCode().equals(chapterCode))
                 .findFirst()
@@ -107,6 +173,8 @@ public class DefaultLawService implements LawService {
     @Override
     public ClauseDto getClauseByCode(String lawId, String chapterCode, String articleCode, String clauseCode){
         Law lawEntity = lawRepository.findById(lawId).orElseThrow(() -> new DataNotFoundException(List.of("Law not found with id: " + lawId)));
+        lawEntity = sort(List.of(lawEntity)).stream().findFirst().orElseThrow();
+
         Chapter chapterEntity = lawEntity.getChapters().stream()
                 .filter(c -> c.getCode().equals(chapterCode))
                 .findFirst()
@@ -137,6 +205,8 @@ public class DefaultLawService implements LawService {
     @Override
     public PointDto getPointByCode(String lawId, String chapterCode, String articleCode, String clauseCode, String pointCode) {
         Law lawEntity = lawRepository.findById(lawId).orElseThrow(() -> new DataNotFoundException(List.of("Law not found with id: " + lawId)));
+        lawEntity = sort(List.of(lawEntity)).stream().findFirst().orElseThrow();
+
         Chapter chapterEntity = lawEntity.getChapters().stream()
                 .filter(c -> c.getCode().equals(chapterCode))
                 .findFirst()
@@ -357,4 +427,101 @@ public class DefaultLawService implements LawService {
                 .build()
         );
     }
+
+    private List<Triplet> extractTriplets(GraphKnowledge graph) {
+        if (graph == null || graph.getTripletGraphs() == null) return List.of();
+        return graph.getTripletGraphs().stream()
+                .map(TripletGraph::getTriplet)
+                .collect(Collectors.toList());
+    }
+
+    private Article findArticleEntity(Law law, String chapterCode, String articleCode) {
+        return law.getChapters().stream()
+                .filter(c -> c.getCode().equals(chapterCode))
+                .flatMap(c -> c.getArticles().stream())
+                .filter(a -> a.getCode().equals(articleCode))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Clause findClauseEntity(Article article, String clauseCode) {
+        return article.getClauses().stream()
+                .filter(c -> c.getCode().equals(clauseCode))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Point findPointEntity(Clause clause, String pointCode) {
+        return clause.getPoints().stream()
+                .filter(p -> p.getCode().equals(pointCode))
+                .findFirst()
+                .orElse(null);
+    }
+
+
+    public PointDto getPointById(String pointId) {
+        Point point = pointRepository.findById(pointId)
+                .orElseThrow(() -> new DataNotFoundException(List.of("Point not found with id: " + pointId)));
+
+        GraphKnowledge graph = point.getGraphKnowledge();
+        List<TripletDto> tripletDtos = new ArrayList<>();
+        if (graph != null && graph.getTripletGraphs() != null) {
+            tripletDtos = graph.getTripletGraphs().stream()
+                    .map(TripletGraph::getTriplet)
+                    .map(tripletMapper::toAdminDto)
+                    .collect(Collectors.toList());
+        }
+
+        PointDto pointDto = pointMapper.toAdminDto(point);
+        pointDto.setGraph(tripletDtos);
+        return pointDto;
+    }
+
+    @Override
+    public ArticleDto getArticleById(String articleId) {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new DataNotFoundException(List.of("Article not found with id: " + articleId)));
+
+        List<TripletDto> tripletDtos = new ArrayList<>();
+        GraphKnowledge graph = article.getGraphKnowledge();
+        if (graph != null && graph.getTripletGraphs() != null) {
+            tripletDtos = graph.getTripletGraphs().stream()
+                    .map(TripletGraph::getTriplet)
+                    .map(tripletMapper::toAdminDto)
+                    .collect(Collectors.toList());
+        }
+
+        ArticleDto articleDto = articleMapper.toAdminDto(article);
+        articleDto.setGraph(tripletDtos);
+        return articleDto;
+    }
+
+    @Override
+    public ClauseDto getClauseById(String clauseId) {
+        Clause clause = clauseRepository.findById(clauseId)
+                .orElseThrow(() -> new DataNotFoundException(List.of("Clause not found with id: " + clauseId)));
+
+        List<TripletDto> tripletDtos = new ArrayList<>();
+        GraphKnowledge graph = clause.getGraphKnowledge();
+        if (graph != null && graph.getTripletGraphs() != null) {
+            tripletDtos = graph.getTripletGraphs().stream()
+                    .map(TripletGraph::getTriplet)
+                    .map(tripletMapper::toAdminDto)
+                    .collect(Collectors.toList());
+        }
+
+        ClauseDto clauseDto = clauseMapper.toAdminDto(clause);
+        clauseDto.setGraph(tripletDtos);
+        return clauseDto;
+    }
+
+    @Override
+    public ChapterDto getChapterById(String chapterId) {
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new DataNotFoundException(List.of("Chapter not found with id: " + chapterId)));
+
+        return chapterMapper.toAdminDto(chapter);
+    }
+
+
 }

@@ -18,6 +18,11 @@ public class LawController {
         return lawService.getAllLaw();
     }
 
+    @GetMapping("/laws")
+    public ListResponse<LawDto> getAllAttachGraph(){
+        return lawService.getLawsWithTripletsAttached();
+    }
+
     @GetMapping("/law/{id}")
     public ResponseEntity<LawDto> getLawById(@PathVariable("id") String id){
         return ResponseEntity.ok(lawService.getLawById(id));
@@ -104,5 +109,29 @@ public class LawController {
             @RequestBody TripletRequest triplet
     ){
         return ResponseEntity.ok(lawService.addTripletToPoint(id, triplet));
+    }
+
+    @GetMapping("/chapters/{id}")
+    public ResponseEntity<ChapterDto> getChapterById(@PathVariable String id) {
+        ChapterDto chapterDto = lawService.getChapterById(id);
+        return ResponseEntity.ok(chapterDto);
+    }
+
+    @GetMapping("/articles/{id}")
+    public ResponseEntity<ArticleDto> getArticleById(@PathVariable String id) {
+        ArticleDto articleDto = lawService.getArticleById(id);
+        return ResponseEntity.ok(articleDto);
+    }
+
+    @GetMapping("/clauses/{id}")
+    public ResponseEntity<ClauseDto> getClauseById(@PathVariable String id) {
+        ClauseDto clauseDto = lawService.getClauseById(id);
+        return ResponseEntity.ok(clauseDto);
+    }
+
+    @GetMapping("/points/{id}")
+    public ResponseEntity<PointDto> getPointById(@PathVariable String id) {
+        PointDto pointDto = lawService.getPointById(id);
+        return ResponseEntity.ok(pointDto);
     }
 }
