@@ -20,4 +20,4 @@ COPY --from=builder /app/target/*.jar app.jar
 COPY src/main/resources/libs/VnCoreNLP-1.2.jar /app/libs/VnCoreNLP-1.2.jar
 
 # Chạy ứng dụng
-ENTRYPOINT ["java", "-cp", "app.jar:/app/libs/VnCoreNLP-1.2.jar", "org.springframework.boot.loader.JarLauncher"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
