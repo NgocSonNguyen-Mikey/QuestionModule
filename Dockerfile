@@ -14,7 +14,7 @@ FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
 # Copy JAR app đã build từ stage builder
-COPY --from=builder /app/target/your-app-name.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
 # Copy file thư viện VnCoreNLP
 COPY src/main/resources/libs/VnCoreNLP-1.2.jar /app/libs/VnCoreNLP-1.2.jar
