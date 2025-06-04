@@ -13,17 +13,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Copy files to VPS
+      - name: Pull latest code
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd /home/son/questionModule/QuestionModule
-            git pull origin main
-            docker-compose down
-            docker-compose build --no-cache
-            docker-compose up -d --remove-orphans
-          EOF
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -tt -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd /home/son/questionModule/QuestionModule && git pull origin main"
+
+      - name: Stop Docker containers
+        run: |
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -tt -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd /home/son/questionModule/QuestionModule && docker-compose down"
+
+      - name: Build Docker containers
+        run: |
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -tt -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd /home/son/questionModule/QuestionModule && docker-compose build --no-cache"
+
+      - name: Start Docker containers
+        run: |
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -tt -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd /home/son/questionModule/QuestionModule && docker-compose up -d --remove-orphans"
