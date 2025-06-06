@@ -520,8 +520,27 @@ public class DefaultLawService implements LawService {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new DataNotFoundException(List.of("Chapter not found with id: " + chapterId)));
 
-        return chapterMapper.toAdminDto(chapter);
+        List<Chapter> chapters = sortChaptersToPoints(new ArrayList<>(List.of(chapter)));
+
+        return chapterMapper.toAdminDto(chapters.stream().findFirst().get());
     }
 
+    private List<Chapter> sortChaptersToPoints(List<Chapter> chapters) {
+        chapters.sort(Comparator.comparing(Chapter::getCode));
+
+        chapters.forEach(chapter -> {
+            chapter.getArticles().sort(Comparator.comparing(Article::getCode));
+
+            chapter.getArticles().forEach(article -> {
+                article.getClauses().sort(Comparator.comparing(Clause::getCode));
+
+                article.getClauses().forEach(clause -> {
+                    clause.getPoints().sort(Comparator.comparing(Point::getCode));
+                });
+            });
+        });
+
+        return chapters;
+    }
 
 }

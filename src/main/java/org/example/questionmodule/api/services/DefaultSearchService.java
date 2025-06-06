@@ -260,6 +260,8 @@ public class DefaultSearchService implements SearchService {
                     .toList().stream()
                     .map(TripletGraph::getGraphKnowledge)
                     .toList();
+            System.out.println("root");
+
 
             result.addAll(graphRoot);
 
@@ -279,20 +281,22 @@ public class DefaultSearchService implements SearchService {
                 .toList();
 
         // Tìm tập hợp Graph Knowledge phù hợp nhất
+
         int temp = result.size();
-//        System.out.println(sortedGraphs.size());
+        System.out.println("size "+temp);
         for (int i = tripletList.size(); i > 0; i--) {
             Integer count = i;
-            result = sortedGraphs.stream()
+            List<GraphKnowledge> graphKnowledgeList = sortedGraphs.stream()
                     .filter(entry -> entry.getValue() >= count)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
+            result.addAll(graphKnowledgeList);
 
             if (result.size() >= temp + 2) {
                 break; // Trả về danh sách GraphKnowledge tìm được
             }
         }
-
+        result.stream().forEach(g -> System.out.println(g.getId()));
         Set<Triplet> inputTriplets = new HashSet<>(tripletList);
 
         for (GraphKnowledge graph : graphKnowledges) {
