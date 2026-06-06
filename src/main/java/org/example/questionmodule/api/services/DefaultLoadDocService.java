@@ -192,7 +192,6 @@ public class DefaultLoadDocService implements LoadDocService {
 
     public String readWordFile(MultipartFile file) throws IOException {
         String filename = file.getOriginalFilename();
-//        if (filename == null) throw new IOException("Không có tên file");
 
         try (InputStream inputStream = file.getInputStream()) {
             if (filename.endsWith(".docx")) {

@@ -17,21 +17,4 @@ public class AppConfig {
     public ChatClient chatClient(ChatClient.Builder chatClientBuilder) {
         return chatClientBuilder.build();
     }
-
-//    @Bean
-//    public WordVectors wordVectors() throws IOException {
-//        // Load file từ resources
-//        ClassPathResource resource = new ClassPathResource("word2vec_model/wiki.vi.vec");
-//
-//        // Đảm bảo file tồn tại
-//        if (!resource.exists()) {
-//            throw new IOException("Không tìm thấy mô hình cc.vi.300.vec trong classpath:/model/");
-//        }
-//
-//        File modelFile = resource.getFile();
-//        System.out.println("✅ Mô hình Word2Vec (.vec) đã được tải thành công!");
-//
-//        return WordVectorSerializer.readWord2VecModel(modelFile, true);
-//
-//    }
 }

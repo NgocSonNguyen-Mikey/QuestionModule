@@ -20,7 +20,6 @@ public class Word2VecService {
     public Word2VecService() {
         // Nạp mô hình trong thread riêng khi service khởi tạo
         new Thread(this::loadModel).start();
-//        wordVectors = new Word2Vec();
     }
 
     private void loadModel() {
@@ -31,8 +30,6 @@ public class Word2VecService {
             this.wordVectors = WordVectorSerializer.readWord2VecModel(modelFile, true); // <- Đúng cho file .vec
             System.out.println("✅ Word2Vec model loaded successfully.");
 
-//                WordVectorSerializer.writeWord2VecModel((Word2Vec) this.wordVectors, binOutput);
-//                System.out.println("✅ File binary đã được ghi tại: " + binOutput.getAbsolutePath());
         } catch (IOException e) {
             System.err.println("❌ Failed to load Word2Vec model: " + e.getMessage());
         } finally {

@@ -69,6 +69,7 @@ public class DefaultLawService implements LawService {
 
                                     // Triplet của Point
                                     clauseDto.getPoints().forEach(pointDto -> {
+                                        assert clauseEntity != null;
                                         Point pointEntity = findPointEntity(clauseEntity, pointDto.getCode());
                                         if (pointEntity != null && pointEntity.getGraphKnowledge() != null) {
                                             List<Triplet> triplets = extractTriplets(pointEntity.getGraphKnowledge());
@@ -93,9 +94,7 @@ public class DefaultLawService implements LawService {
 
     @Override
     public ListResponse<LawDto> getAllLaw(){
-        List<Law> lawList = lawRepository.findAll();
-
-        lawList = sort(lawList);
+        List<Law> lawList = lawRepository.findAll().stream().sorted().toList();
 
         return ListResponse.<LawDto>builder()
                 .data(lawMapper.toAdminDtoList(lawList))
@@ -385,8 +384,6 @@ public class DefaultLawService implements LawService {
     }
 
     private TripletGraph removeTripletFromGraph(GraphKnowledge graph, String tripletId) {
-
-//        graph.getTripletGraphs().forEach(t-> System.out.println(t.getTriplet().getId()));
 
         TripletGraph tripletGraph = graph.getTripletGraphs().stream()
                 .filter(t -> t.getTriplet().getId().equals(tripletId))

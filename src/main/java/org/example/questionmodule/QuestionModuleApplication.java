@@ -13,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class QuestionModuleApplication {
 
     public static void main(String[] args) {
-        System.out.println("✅ Total Memory (MB): " + Runtime.getRuntime().maxMemory() / (1024 * 1024));
         SpringApplication.run(QuestionModuleApplication.class, args);
     }
 

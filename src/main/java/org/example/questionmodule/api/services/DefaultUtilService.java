@@ -54,8 +54,6 @@ public class DefaultUtilService implements UtilService {
         }
         wordForm = wordForm.replace('_', ' ').trim();
 
-//        System.out.println(wordForm);
-//        System.out.println(concept.getName());
         if (concept.getName().equalsIgnoreCase(wordForm)) {
             return true;
         }
@@ -91,9 +89,7 @@ public class DefaultUtilService implements UtilService {
             List<Word> wordList = entry.getValue();
             String word = String.join(" ",wordList.stream().map(Word::getForm).toList());
             for (Concept concept : concepts) {
-//                    System.out.println(concept.getName());
                 if (matchConcept(concept,word)) {
-//                        System.out.println(concept.getName());
                     result.put(wordIndex, concept); // Gán concept vào map
                     break; // Nếu đã tìm thấy concept khớp, không cần kiểm tra thêm
                 }
@@ -104,9 +100,6 @@ public class DefaultUtilService implements UtilService {
         return result;
     }
 
-    // Hàm so sánh từ với concept
-
-
     public Multimap<Integer, Relation> getRelation(List<Relation> relations, Multimap<Integer, List<Word>> words) {
         Multimap<Integer, Relation> result = ArrayListMultimap.create();
 
@@ -115,7 +108,6 @@ public class DefaultUtilService implements UtilService {
             int wordIndex = entry.getKey(); // Lấy index của từ trong câu
             List<Word> wordList = entry.getValue();
             String word = String.join(" ",wordList.stream().map(Word::getForm).toList());
-//            System.out.println(word);
             for (Relation relation : relations) {
                 if (matchRelation(relation, word)) {
                     result.put(wordIndex, relation); // Gán concept vào map

@@ -38,7 +38,6 @@ public class DefaultSearchService implements SearchService {
 
     @Override
     public ResponseDto process(String sentences) {
-//        sentences = sentences.toLowerCase();
         long start = System.currentTimeMillis();
         List<String> sentencePretreatment = aiService.pretreatmentAnswer(sentences);
         List<Concept> concepts = conceptRepository.findAllQuery();
@@ -107,7 +106,7 @@ public class DefaultSearchService implements SearchService {
 
                                             return builder.toString();
                                         })
-                                        .filter(content -> content != null && !content.isBlank())
+                                        .filter(content -> !content.isBlank())
                                         .collect(Collectors.joining("\n\n"))
                         ))
                 .attachedLaw(mapToLawDtoList(findGraph))
@@ -118,7 +117,6 @@ public class DefaultSearchService implements SearchService {
         List<Word> Word = sentence.getWords().stream().toList();
         Multimap<Integer, List<Word>> subjects = utilService.deleteDuplicateWord(ruleParser.executeRules(Word, "subject_rule.drl"));
         Multimap<Integer, List<Word>> relationMap = utilService.deleteDuplicateWord(ruleParser.executeRules(Word, "relation_rule.drl"));
-        System.out.println("cau:" + sentence.toString());
         SentenceType sentenceType = ruleParser.executeSentenceTypeRules(Word);
 
         Multimap<Integer, Concept> conceptList = utilService.getConcept(concepts, subjects);
@@ -260,8 +258,6 @@ public class DefaultSearchService implements SearchService {
                     .toList().stream()
                     .map(TripletGraph::getGraphKnowledge)
                     .toList();
-            System.out.println("root");
-
 
             result.addAll(graphRoot);
 
@@ -269,7 +265,6 @@ public class DefaultSearchService implements SearchService {
                     .map(TripletGraph::getGraphKnowledge)
                     .toList()
             ) {
-//                System.out.println("test");
                 graphCount.put(graph, graphCount.getOrDefault(graph, 0) + 1);
             }
         }
@@ -289,14 +284,13 @@ public class DefaultSearchService implements SearchService {
             List<GraphKnowledge> graphKnowledgeList = sortedGraphs.stream()
                     .filter(entry -> entry.getValue() >= count)
                     .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
+                    .toList();
             result.addAll(graphKnowledgeList);
 
             if (result.size() >= temp + 2) {
                 break; // Trả về danh sách GraphKnowledge tìm được
             }
         }
-        result.stream().forEach(g -> System.out.println(g.getId()));
         Set<Triplet> inputTriplets = new HashSet<>(tripletList);
 
         for (GraphKnowledge graph : graphKnowledges) {

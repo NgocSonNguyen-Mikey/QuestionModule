@@ -23,7 +23,6 @@ public class SearchController {
 
     private final VNCoreNlpService vnCoreNlpService;
 
-//    @PreAuthorize("hasRole('USER')")
     @GetMapping("")
     public ResponseDto search(@RequestParam String question) throws IOException {
         return searchService.process(question);

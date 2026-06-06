@@ -28,7 +28,6 @@ public class AsyncService {
     private final LawRepository lawRepository;
     private final VNCoreNlpService vnCoreNlpService;
     private final UtilService utilService;
-    private final AIService aiService;
     private final ConceptRepository conceptRepository;
     private final RelationRepository relationRepository;
     private final TripletRepository tripletRepository;
@@ -212,9 +211,6 @@ public class AsyncService {
 
     public List<Triplet> process(String sentences, List<Concept> concepts, List<Relation> relations, List<Triplet> triplets) {
 
-//        List<String> sentencePretreatment = aiService.pretreatmentDoc(sentences);
-
-
         List<Sentence> sentenceList = vnCoreNlpService.analyzeText(sentences);
 
         return sentenceList.stream().map(sentence -> {
@@ -270,27 +266,6 @@ public class AsyncService {
         List<Word> words = sentence.getWords().stream().toList();
         Multimap<Integer, List<Word>> subjectMap = utilService.deleteDuplicateWord(ruleParser.executeRules(words, "subject_rule.drl"));
         Multimap<Integer, List<Word>> relationMap = utilService.deleteDuplicateWord(ruleParser.executeRules(words, "relation_rule.drl"));
-
-//        System.out.println("Concept List:");
-//        for (Map.Entry<Integer, List<Word>> entry : subjectMap.entries()) {
-//            Integer key = entry.getKey();
-//            List<Word> value = entry.getValue();
-//            System.out.println("Key: " + key + ", Value: " + value.stream()
-//                    .map(Word::getForm)
-//                    .collect(Collectors.joining(" ")));
-//        }
-//
-//        System.out.println("Relation List:");
-//        for (Map.Entry<Integer, List<Word>> entry : relationMap.entries()) {
-//            Integer key = entry.getKey();
-//            List<Word> value = entry.getValue();
-//            System.out.println("Key: " + key + ", Value: " + value.stream()
-//                    .map(Word::getForm)
-//                    .collect(Collectors.joining(" ")));
-//
-//        }
-
-        System.out.println(sentence);
 
         SentenceType sentenceType = ruleParser.executeSentenceTypeRules(words);
 
@@ -441,7 +416,6 @@ public class AsyncService {
             int wordIndex = entry.getKey(); // Lấy index của từ trong câu
             List<Word> wordList = entry.getValue();
             String word = String.join(" ",wordList.stream().map(Word::getForm).toList());
-//            System.out.println(word);
             for (Relation relation : relations) {
                 if (utilService.matchRelation(relation, word)) {
                     result.put(wordIndex, relation);

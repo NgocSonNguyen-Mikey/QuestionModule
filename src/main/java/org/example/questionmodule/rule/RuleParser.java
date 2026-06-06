@@ -51,7 +51,6 @@ public class RuleParser {
 
         kieSession.fireAllRules();
         kieSession.dispose();
-        System.out.println(results);
         return results.stream()
                 .filter(type -> type == SentenceType.NEGATIVE || type == SentenceType.QUESTION)
                 .findFirst()
